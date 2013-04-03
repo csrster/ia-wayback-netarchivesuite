@@ -33,6 +33,7 @@
     <bean name="${replayPort}:wayback" class="org.archive.wayback.webapp.AccessPoint">
         <property name="collection" ref="localcdxcollection" />
         <property name="replay" ref="archivalurlreplay" />
+        <property name="urlRoot" value="http://kb-prod-way-001.kb.dk:${replayPort}/wayback/" />
         <property name="query">
             <bean class="org.archive.wayback.query.Renderer">
                 <property name="captureJsp" value="/WEB-INF/query/CalendarResults.jsp" />
