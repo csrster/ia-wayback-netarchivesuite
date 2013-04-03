@@ -2,370 +2,412 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.archive.wayback</groupId>
-  <artifactId>wayback</artifactId>
-  <packaging>pom</packaging>
-  <version>1.8.0-SNAPSHOT</version>
-  <name>Wayback</name>
+    <parent>
+        <groupId>org.sbforge</groupId>
+        <artifactId>sbforge-parent</artifactId>
+        <version>8</version>
+    </parent>
 
-  <modules>
-    <module>wayback-core</module>
-    <module>wayback-webapp</module>
-    <module>dist</module>
-  </modules>
+    <groupId>org.archive.wayback</groupId>
+    <artifactId>wayback</artifactId>
+    <packaging>pom</packaging>
+    <version>1.8.0-SNAPSHOT</version>
+    <name>Wayback</name>
 
-  <properties>
-    <website.url>http://github.com/internetarchive/wayback</website.url>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <modules>
+        <module>wayback-core</module>
+        <module>wayback-webapp</module>
+        <module>dist</module>
+    </modules>
 
-  <description>
-    The wayback project is an open source implementation of the
-    Internet Archive's Wayback Machine.
-  </description>
-  
-  <url>http://github.com/internetarchive/wayback</url>
-  <inceptionYear>2005</inceptionYear>
+    <properties>
+        <website.url>http://github.com/internetarchive/wayback</website.url>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <replayPort>8090</replayPort>
+        <proxyPort>8080</proxyPort>
+    </properties>
 
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
+    <description>
+        The wayback project is an open source implementation of the
+        Internet Archive's Wayback Machine.
+    </description>
 
-  <organization>
-    <name>Internet Archive</name>
-    <url>http://www.archive.org/</url>
-  </organization>
+    <url>http://github.com/internetarchive/wayback</url>
+    <inceptionYear>2005</inceptionYear>
 
-  <issueManagement>
-    <system>Jira</system>
-    <url>http://webarchive.jira.com/secure/IssueNavigator.jspa?component=10031</url>
-  </issueManagement>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-  <ciManagement>
-    <system>continuum</system>
-    <url>http://builds.archive.org:8081/continuum/</url>
-  </ciManagement>
-  
-  <mailingLists>
-    <mailingList>
-      <name>Archive Access ARC Tools Discussion List</name>
-      <subscribe>
-        http://lists.sourceforge.net/lists/listinfo/archive-access-discuss
-      </subscribe>
-      <unsubscribe>
-        http://lists.sourceforge.net/lists/listinfo/archive-access-discuss
-      </unsubscribe>
-      <post>archive-access-discuss</post>
-      <archive>
-        http://sourceforge.net/mailarchive/forum.php?forum_name=archive-access-discuss
-      </archive>
-    </mailingList>
-    <mailingList>
-      <name>Archive Access ARC Tools Commits</name>
-      <subscribe>
-        https://lists.sourceforge.net/lists/listinfo/archive-access-cvs
-      </subscribe>
-      <unsubscribe>
-        https://lists.sourceforge.net/lists/listinfo/archive-access-cvs
-      </unsubscribe>
-      <post>archive-access-cvs</post>
-      <archive>
-        http://sourceforge.net/mailarchive/forum.php?forum=archive-access-cvs
-      </archive>
-    </mailingList>
-  </mailingLists>
+    <organization>
+        <name>Internet Archive</name>
+        <url>http://www.archive.org/</url>
+    </organization>
 
-  <repositories>
-    <repository>
+    <issueManagement>
+        <system>Jira</system>
+        <url>http://webarchive.jira.com/secure/IssueNavigator.jspa?component=10031</url>
+    </issueManagement>
 
-      <id>internetarchive</id>
-      <name>Internet Archive Maven Repository</name>
-      <url>http://builds.archive.org:8080/maven2</url>
-      <layout>default</layout>
+    <ciManagement>
+        <system>continuum</system>
+        <url>http://builds.archive.org:8081/continuum/</url>
+    </ciManagement>
 
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </snapshots>
-    </repository>
-    
-      <repository>
-        <id>cloudera</id>
-        <name>Cloudera Hadoop</name>
-        <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-        <layout>default</layout>
+    <mailingLists>
+        <mailingList>
+            <name>Archive Access ARC Tools Discussion List</name>
+            <subscribe>
+                http://lists.sourceforge.net/lists/listinfo/archive-access-discuss
+            </subscribe>
+            <unsubscribe>
+                http://lists.sourceforge.net/lists/listinfo/archive-access-discuss
+            </unsubscribe>
+            <post>archive-access-discuss</post>
+            <archive>
+                http://sourceforge.net/mailarchive/forum.php?forum_name=archive-access-discuss
+            </archive>
+        </mailingList>
+        <mailingList>
+            <name>Archive Access ARC Tools Commits</name>
+            <subscribe>
+                https://lists.sourceforge.net/lists/listinfo/archive-access-cvs
+            </subscribe>
+            <unsubscribe>
+                https://lists.sourceforge.net/lists/listinfo/archive-access-cvs
+            </unsubscribe>
+            <post>archive-access-cvs</post>
+            <archive>
+                http://sourceforge.net/mailarchive/forum.php?forum=archive-access-cvs
+            </archive>
+        </mailingList>
+    </mailingLists>
 
-        <releases>
-          <enabled>true</enabled>
-          <updatePolicy>daily</updatePolicy>
-          <checksumPolicy>warn</checksumPolicy>
-        </releases>
-        <snapshots>
-          <enabled>true</enabled>
-          <updatePolicy>daily</updatePolicy>
-          <checksumPolicy>warn</checksumPolicy>
-        </snapshots>
-      </repository>
-          
-  </repositories>
+    <repositories>
+        <repository>
 
-  <pluginRepositories>
-    <pluginRepository>
+            <id>internetarchive</id>
+            <name>Internet Archive Maven Repository</name>
+            <url>http://builds.archive.org:8080/maven2</url>
+            <layout>default</layout>
 
-      <id>archive</id>
-      <name>archive.org</name>
-      <url>http://builds.archive.org:8080/maven2</url>
-      <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
 
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
+        <repository>
+            <id>cloudera</id>
+            <name>Cloudera Hadoop</name>
+            <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+            <layout>default</layout>
 
-  <scm>
-    <connection>
-      scm:git:git://github.com/internetarchive/wayback-machine.git
-    </connection>
-    <tag>HEAD</tag>
-    <url>
-      http://github.com/internetarchive/wayback-machine
-    </url>
-  </scm>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </repository>
 
-  <prerequisites>
-    <maven>2.1</maven>
-  </prerequisites>
+        <!--<repository>
+            <id>sbforge-nexus</id>
+            <name>SBForgeb Nexus Repo manager</name>
+            <url>https://sbforge.org/nexus/content/repositories/snapshots</url>
+            <layout>default</layout>
+            <releases>
+             <enabled>true</enabled>
+             <updatePolicy>daily</updatePolicy>
+             <checksumPolicy>warn</checksumPolicy>
+           </releases>
+           <snapshots>
+             <enabled>true</enabled>
+             <updatePolicy>daily</updatePolicy>
+             <checksumPolicy>warn</checksumPolicy>
+           </snapshots>
+        </repository>-->
 
 
-  <build>
-    <plugins>
-      <plugin>
-        <!-- install source jars to maven repo
-             http://maven.apache.org/plugins/maven-source-plugin/usage.html -->
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.2</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>maven-jetty-plugin</artifactId>
-          <version>6.1.22</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 
-  <distributionManagement>
-    <repository>
-      <id>repository</id>
-      <name>Repository</name>
-      <!--Pass as command-line system property to maven-->
-      <url>${repository.url}</url>
-    </repository>
-    <site>
-      <id>website</id>
-      <name>Website</name>
-      <!--Pass as command-line system property to maven-->
-      <url>${website.url}/projects/wayback/</url>
-    </site>
-  </distributionManagement>
+    </repositories>
 
-  <developers>
-     <developer>
-      <name>Brad Tofel</name>
-      <id>bradtofel</id>
-      <email>brad at archive dot org</email>
-      <organization>Internet Archive</organization>
-      <url>http://www.archive.org</url>
-      <timezone>-8</timezone>
-    </developer>
-    <developer>
-      <name>Ilya Kreymer</name>
-      <id>ikreymer</id>
-      <email>ilya at archive dot org</email>
-      <organization>Internet Archive</organization>
-      <url>http://www.archive.org</url>
-      <timezone>-8</timezone>
-    </developer>
- </developers>
+    <pluginRepositories>
+        <pluginRepository>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <code>javadoc:aggregate</code>
-          <code>javadoc:test-aggregate</code>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.1</version>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>dependencies</report>
-              <report>project-team</report>
-              <report>mailing-list</report>
-              <report>cim</report>
-              <report>issue-tracking</report>
-              <report>license</report>
-              <report>scm</report>
-            </reports>
-          </reportSet>
-        </reportSets>
-      </plugin>
-    </plugins>
-  </reporting>
+            <id>archive</id>
+            <name>archive.org</name>
+            <url>http://builds.archive.org:8080/maven2</url>
+            <layout>default</layout>
 
-<!--
-  Finally, the dependencyManagement - all version coordinates for all
-  dependencies should be specified here, allowing child modules to specify
-  only groupId and artifactId coordinates.
--->
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
-  <dependencyManagement>
-    <dependencies>
-    
-      <!--
-        Link all Wayback child module version dependencies to the parent POM
-        version.
-      -->
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>wayback-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>wayback-webapp</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.5</version>
-        <scope>provided</scope>
-      </dependency>
-           
-      <dependency>
-        <groupId>org.archive.heritrix</groupId>
-        <artifactId>heritrix-commons</artifactId>
-        <version>3.1.2-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.archive</groupId>
-        <artifactId>ia-web-commons</artifactId>
-        <version>1.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.archive.access-control</groupId>
-        <artifactId>access-control</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mozilla</groupId>
-        <artifactId>juniversalchardet</artifactId>
-        <version>1.0.3</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-core</artifactId>
-        <version>2.5.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-beans</artifactId>
-        <version>2.5.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.beanshell</groupId>
-        <artifactId>bsh</artifactId>
-        <version>2.0b4</version>
-      </dependency>
-      <dependency>
-        <groupId>org.htmlparser</groupId>
-        <artifactId>htmlparser</artifactId>
-        <version>1.6</version>
-      </dependency>
-      <dependency>
-        <groupId>com.flagstone</groupId>
-        <artifactId>transform</artifactId>
-        <version>3.0.2</version>
-      </dependency>
-      <dependency>
-        <artifactId>hadoop-core</artifactId>
-        <groupId>org.apache.hadoop</groupId>
-        <version>0.20.2-cdh3u4</version>
-      </dependency>
+    <scm>
+        <connection>
+            scm:git:git://github.com/internetarchive/wayback-machine.git
+        </connection>
+        <tag>HEAD</tag>
+        <url>
+            http://github.com/internetarchive/wayback-machine
+        </url>
+    </scm>
+
+    <prerequisites>
+        <maven>2.1</maven>
+    </prerequisites>
 
 
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>3.8.1</version>
-        <scope>test</scope>
-      </dependency>
+    <build>
+        <plugins>
+            <plugin>
+                <!-- install source jars to maven repo
+               http://maven.apache.org/plugins/maven-source-plugin/usage.html -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>maven-jetty-plugin</artifactId>
+                    <version>6.1.22</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>repository</id>
+            <name>Repository</name>
+            <!--Pass as command-line system property to maven-->
+            <url>${repository.url}</url>
+        </repository>
+        <site>
+            <id>website</id>
+            <name>Website</name>
+            <!--Pass as command-line system property to maven-->
+            <url>${website.url}/projects/wayback/</url>
+        </site>
+    </distributionManagement>
+
+    <developers>
+        <developer>
+            <name>Brad Tofel</name>
+            <id>bradtofel</id>
+            <email>brad at archive dot org</email>
+            <organization>Internet Archive</organization>
+            <url>http://www.archive.org</url>
+            <timezone>-8</timezone>
+        </developer>
+        <developer>
+            <name>Ilya Kreymer</name>
+            <id>ikreymer</id>
+            <email>ilya at archive dot org</email>
+            <organization>Internet Archive</organization>
+            <url>http://www.archive.org</url>
+            <timezone>-8</timezone>
+        </developer>
+    </developers>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <code>javadoc:aggregate</code>
+                    <code>javadoc:test-aggregate</code>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.1</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>dependencies</report>
+                            <report>project-team</report>
+                            <report>mailing-list</report>
+                            <report>cim</report>
+                            <report>issue-tracking</report>
+                            <report>license</report>
+                            <report>scm</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <!--
-         org.dspace-foresite doesn't seem to be in any pulic repository,
-         so a custom built version is on builds.archive.org, with SNAPSHOT
-         version..
-         TODO: fix this..
+      Finally, the dependencyManagement - all version coordinates for all
+      dependencies should be specified here, allowing child modules to specify
+      only groupId and artifactId coordinates.
     -->
-      <dependency>
-        <groupId>org.dspace</groupId>
-        <artifactId>foresite</artifactId>
-        <version>SNAPSHOT</version>
-      </dependency>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!--
+              Link all Wayback child module version dependencies to the parent POM
+              version.
+            -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>wayback-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>wayback-webapp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.5</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.archive.heritrix</groupId>
+                <artifactId>heritrix-commons</artifactId>
+                <version>3.1.2-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.archive</groupId>
+                <artifactId>ia-web-commons</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.archive.access-control</groupId>
+                <artifactId>access-control</artifactId>
+                <version>0.1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>juniversalchardet</artifactId>
+                <version>1.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>2.5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.beanshell</groupId>
+                <artifactId>bsh</artifactId>
+                <version>2.0b4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.htmlparser</groupId>
+                <artifactId>htmlparser</artifactId>
+                <version>1.6</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flagstone</groupId>
+                <artifactId>transform</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+            <dependency>
+                <artifactId>hadoop-core</artifactId>
+                <groupId>org.apache.hadoop</groupId>
+                <version>0.20.2-cdh3u4</version>
+            </dependency>
+            <dependency>
+                <groupId>dk.netarchivesuite</groupId>
+                <artifactId>netarchivesuite-common</artifactId>
+                <version>4.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>dk.netarchivesuite</groupId>
+                <artifactId>netarchivesuite-archive</artifactId>
+                <version>4.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>dk.netarchivesuite</groupId>
+                <artifactId>netarchivesuite-wayback</artifactId>
+                <version>4.1-SNAPSHOT</version>
+            </dependency>
 
 
-            
-    </dependencies>
-  </dependencyManagement>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>3.8.1</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                 org.dspace-foresite doesn't seem to be in any pulic repository,
+                 so a custom built version is on builds.archive.org, with SNAPSHOT
+                 version..
+                 TODO: fix this..
+            -->
+            <dependency>
+                <groupId>org.dspace</groupId>
+                <artifactId>foresite</artifactId>
+                <version>SNAPSHOT</version>
+            </dependency>
+
+
+
+        </dependencies>
+    </dependencyManagement>
 
 
 

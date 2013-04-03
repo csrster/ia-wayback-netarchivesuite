@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+       default-init-method="init">
+
+    <!--
+        Macro-like substitutions for the overall file:
+          wayback.basedir: default top level directory for all index, state,
+                             locationdb storage.
+    -->
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="properties">
+            <value>
+                wayback.basedir=/
+            </value>
+        </property>
+    </bean>
+
+    <import resource="CDXCollection.xml"/>
+
+
+    <import resource="ArchivalUrlReplay.xml"/>
+
+    <!--
+       These wayback settings create an archivalurlreplay connection on port 8090 and a proxyreplay collection on port
+        8080.
+    -->
+
+
+    <bean name="${replayPort}:wayback" class="org.archive.wayback.webapp.AccessPoint">
+        <property name="collection" ref="localcdxcollection" />
+        <property name="replay" ref="archivalurlreplay" />
+        <property name="query">
+            <bean class="org.archive.wayback.query.Renderer">
+                <property name="captureJsp" value="/WEB-INF/query/CalendarResults.jsp" />
+            </bean>
+        </property>
+
+        <property name="uriConverter">
+            <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
+                <property name="replayURIPrefix" value="http://kb-prod-way-001.kb.dk:${replayPort}/wayback/"/>
+            </bean>
+        </property>
+
+        <property name="parser">
+            <bean class="org.archive.wayback.archivalurl.ArchivalUrlRequestParser">
+                <property name="maxRecords" value="20000" />
+                <property name="earliestTimestamp" value="2005" />
+            </bean>
+        </property>
+
+    </bean>
+
+    <import resource="ProxyReplay.xml"/>
+    <bean name="${proxyPort}" parent="${replayPort}:wayback">
+        <property name="urlRoot" value="http://kb-prod-way-001.kb.dk:${proxyPort}/" />
+        <property name="replay" ref="proxyreplay" />
+        <!--<property name="exclusionFactory" ref="static-exclusion"/>-->
+        <property name="exclusionFactory">
+            <bean class="org.archive.wayback.accesscontrol.staticmap.StaticMapExclusionFilterFactory" init-method="init">
+                <property name="file" value="/home/prod/wayback_exclude.txt" />
+                <property name="checkInterval" value="600" />
+            </bean>
+        </property>
+        <property name="uriConverter">
+            <bean class="org.archive.wayback.proxy.RedirectResultURIConverter">
+                <property name="redirectURI" value="http://kb-prod-way-001.kb.dk:${proxyPort}/jsp/QueryUI/Redirect.jsp" />
+            </bean>
+
+        </property>
+        <property name="parser">
+            <bean class="org.archive.wayback.proxy.ProxyRequestParser" >
+                <property name="localhostNames">
+                    <list>
+                        <value>kb-prod-way-001.kb.dk</value>
+                        <value>kb-prod-way-001</value>
+                    </list>
+                </property>
+                <property name="maxRecords" value="60000" />
+            </bean>
+        </property>
+    </bean>
+
+</beans>

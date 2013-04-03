@@ -2,47 +2,85 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <artifactId>wayback</artifactId>
-    <groupId>org.archive.wayback</groupId>
-    <version>1.8.0-SNAPSHOT</version>
-  </parent>
+    <parent>
+        <artifactId>wayback</artifactId>
+        <groupId>org.archive.wayback</groupId>
+        <version>1.8.0-SNAPSHOT</version>
+    </parent>
 
-  <artifactId>wayback-webapp</artifactId>
-  <name>Wayback Web Application</name>
-  <packaging>war</packaging>
+    <artifactId>wayback-webapp</artifactId>
+    <name>Wayback Web Application</name>
+    <packaging>war</packaging>
 
-  <build>
-    <finalName>wayback-${project.version}</finalName>
-    <plugins>
-      <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <warSourceDirectory>src/main/webapp</warSourceDirectory>
-          <archive>
-            <addMavenDescriptor>false</addMavenDescriptor>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <configuration>
-          <webAppConfig>
-            <contextPath>/</contextPath>
-          </webAppConfig>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <build>
+        <finalName>wayback-${project.version}</finalName>
+        <!--
+        Here we exclude the resources directory and then include the two sub-directories explicitly later. This
+        could possibly be simplified by using a webresources folder for the spring configurations.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <!--<warSourceDirectory>src/main/webapp</warSourceDirectory>-->
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                    <webResources>
+                        <webResource>
+                            <directory>src/main/resources/springResources</directory>
+                            <targetPath>WEB-INF</targetPath>
+                            <filtering>true</filtering>
+                        </webResource>
+                        <webResource>
+                            <directory>src/main/resources/classpathResources</directory>
+                            <targetPath>WEB-INF/classes</targetPath>
+                        </webResource>
+                    </webResources>
+                    <excludes>
 
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>wayback-core</artifactId>
-    </dependency>
-  </dependencies>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <configuration>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                    </webAppConfig>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wayback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dk.netarchivesuite</groupId>
+            <artifactId>netarchivesuite-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dk.netarchivesuite</groupId>
+            <artifactId>netarchivesuite-archive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dk.netarchivesuite</groupId>
+            <artifactId>netarchivesuite-wayback</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
