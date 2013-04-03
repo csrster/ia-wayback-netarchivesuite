@@ -25,8 +25,8 @@
     <properties>
         <website.url>http://github.com/internetarchive/wayback</website.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <replayPort>8090</replayPort>
-        <proxyPort>8080</proxyPort>
+        <replayPort>8091</replayPort>
+        <proxyPort>8081</proxyPort>
     </properties>
 
     <description>
