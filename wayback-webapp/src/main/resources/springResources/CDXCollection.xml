@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
+       default-init-method="init">
+
+    <bean id="localcdxcollection" class="org.archive.wayback.webapp.WaybackCollection">
+
+        <property name="resourceStore">
+            <bean class="dk.netarkivet.wayback.NetarchiveResourceStore">
+                <!--  <property name="prefix" value="/home/netarkiv/csr/apache-tomcat-6.0.16/webapps/arcrep" /> -->
+            </bean>
+        </property>
+
+
+        <property name="resourceIndex">
+
+            <bean class="org.archive.wayback.resourceindex.LocalResourceIndex">
+                <property name="source">
+
+
+                    <bean class="org.archive.wayback.resourceindex.CompositeSearchResultSource">
+                        <property name="CDXSources">
+                            <list>
+                                <value>/data/1_10000.cdx</value>
+                                <value>/data/10001_20000.cdx</value>
+                                <value>/data/20001_30000.cdx</value>
+                                <value>/data/30001_40000.cdx</value>
+                                <value>/data/40001_50000.cdx</value>
+                                <value>/data/50001_60000.cdx</value>
+                                <value>/data/60001_70000.cdx</value>
+                                <value>/data/70001_80000.cdx</value>
+                                <value>/data/80001_90000.cdx</value>
+                                <value>/data/90001_100000.cdx</value>
+                                <value>/data/100001_110000.cdx</value>
+                                <value>/data/110001_120000.cdx</value>
+                                <value>/data/120001_130000.cdx</value>
+                                <value>/data/130001_140000.cdx</value>
+                                <value>/data/140001_150000.cdx</value>
+                                <value>/data/150001_156400.cdx</value>
+                                <value>/data/wayback.index.1</value>
+                                <value>/data/wayback_cdx/wayback.index.1</value>
+                                <value>/data/wayback_cdx/wayback.index.2</value>
+                                <value>/data/wayback_cdx/wayback.index.3</value>
+                                <value>/data/wayback_cdx/wayback.index.4</value>
+                                <value>/data/wayback_cdx/wayback.index.5</value>
+                                <value>/data/wayback_cdx/wayback.index.6</value>
+                                <value>/data/wayback_cdx/wayback.index.7</value>
+                                <value>/data/wayback_cdx/wayback.index.8</value>
+                                <value>/data/wayback_cdx/wayback.index.9</value>
+                                <value>/data1/wayback_cdx/wayback.index</value>
+                                <!--
+                                                  <value>/data/wayback_cdx/wayback.index</value>
+                                                  <value>/data/150001_156400.cdx</value>
+                                -->
+                            </list>
+                        </property>
+                    </bean>
+                </property>
+                <property name="maxRecords" value="60000" />
+            </bean>
+        </property>
+    </bean>
+</beans>
