@@ -101,5 +101,8 @@
 
             </list>
         </property>
+        <property name="closestSelector">
+            <bean class="org.archive.wayback.archivalurl.ArchivalUrlDateRedirectingClosestResultSelector"/>
+        </property>
     </bean>
 </beans>
