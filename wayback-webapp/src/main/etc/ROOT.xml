@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context docBase="/home/prod/csr/wars/wayback.war">
+
+    <!--
+    The following path must be relative to the WEB-INF directory. Don't try to use an absolute path.
+    -->
+     <Parameter name="config-path" value="../../../config/wayback.xml" override="false" />
+     <!--<Parameter name="logging-config-path" value="/home/prod/csr/config/logging.properties" /> -->
+</Context>

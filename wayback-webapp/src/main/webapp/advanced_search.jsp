@@ -23,6 +23,7 @@ String replayPrefix = wbRequest.getAccessPoint().getReplayPrefix();
 </select>
 <input type="TEXT" name="url" width="80">
 <br></br>
+<!--
 <%= fmt.format("AdvancedSearch.exactDate") %>
 <input type="TEXT" name="exactdate" width="80">
 <br></br>
@@ -32,6 +33,7 @@ String replayPrefix = wbRequest.getAccessPoint().getReplayPrefix();
 <%= fmt.format("AdvancedSearch.latestDate") %>
 <input type="TEXT" name="enddate" width="80">
 <br></br>
+-->
 <input type="SUBMIT" value="<%= fmt.format("AdvancedSearch.submitButton") %>">
 </form>
 <jsp:include page="/WEB-INF/template/UI-footer.jsp" flush="true" />

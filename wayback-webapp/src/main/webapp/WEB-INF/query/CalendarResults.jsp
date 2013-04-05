@@ -72,7 +72,7 @@ int numPartitions = partitions.size();
 <!--    RESULT COLUMN HEADERS -->
    <tr bgcolor="#CCCCCC">
 <%
-  for(int i = 0; i < numPartitions; i++) {
+  for(int i = 9; i < numPartitions; i++) {
 	  Partition<CaptureSearchResult> partition = partitions.get(i);
 %>
       <td align="center" class="mainBigBody">
@@ -89,7 +89,7 @@ int numPartitions = partitions.size();
 <!--    RESULT COLUMN COUNTS -->
    <tr bgcolor="#CCCCCC">
 <%
-  for(int i = 0; i < numPartitions; i++) {
+  for(int i = 9; i < numPartitions; i++) {
 	  Partition<CaptureSearchResult> partition = partitions.get(i);
 %>
       <td align="center" class="mainBigBody">
@@ -108,7 +108,7 @@ int numPartitions = partitions.size();
   boolean first = false;
   String lastMD5 = null;
 
-  for(int i = 0; i < numPartitions; i++) {
+  for(int i = 9; i < numPartitions; i++) {
 	  Partition<CaptureSearchResult> partition = partitions.get(i);
 	  List<CaptureSearchResult> partitionResults = partition.list();
 %>

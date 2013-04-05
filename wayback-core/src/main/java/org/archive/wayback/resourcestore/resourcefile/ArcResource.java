@@ -30,6 +30,7 @@ import java.util.Set;
 import org.apache.commons.httpclient.Header;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveRecord;
+import org.archive.io.arc.ARCReader;
 import org.archive.io.arc.ARCRecord;
 import org.archive.wayback.core.Resource;
 import org.archive.wayback.replay.HttpHeaderOperation;
@@ -64,7 +65,16 @@ public class ArcResource extends Resource {
 	 * resource
 	 */
 	Hashtable<String,String> metaData = new Hashtable<String,String>();
-	
+
+    /**
+     * Method added for compatibility with binaries compiled against older versions of this class.
+     * @param rec
+     * @param reader
+     */
+    public ArcResource(final ARCRecord rec, final ARCReader reader) {
+        this(rec, (ArchiveReader) reader);
+    }
+
 	/**
 	 * Constructor
 	 * 
