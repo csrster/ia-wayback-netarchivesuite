@@ -394,6 +394,12 @@
                 <groupId>dk.netarchivesuite</groupId>
                 <artifactId>netarchivesuite-archive</artifactId>
                 <version>4.1-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>berkeleydb</groupId>
+                        <artifactId>je</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>dk.netarchivesuite</groupId>
