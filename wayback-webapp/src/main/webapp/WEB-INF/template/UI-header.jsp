@@ -35,9 +35,9 @@ String replayPrefix = results.getReplayPrefix();
 			<tr>
 
 				<!-- WAYBACK LOGO -->
-				
+				<!--
 				<td width="26%"><a href="<%= staticPrefix %>"><img src="<%= staticPrefix %>images/wayback_logo_tr.gif" width="153" height="54" border="0"></a></td>
-
+                -->
 				<!-- /WAYBACK LOGO -->
 			
 				<!-- COLLECTION-EMPTYLOGO -->
@@ -72,7 +72,8 @@ String replayPrefix = results.getReplayPrefix();
 													<input type="hidden" name="<%= WaybackRequest.REQUEST_TYPE %>" value="<%= WaybackRequest.REQUEST_CAPTURE_QUERY %>">
 													<input type="text" name="<%= WaybackRequest.REQUEST_URL %>" value="http://" size="24" maxlength="256">
 													&nbsp;
-												</b> 
+												</b>
+                                                <!--
 												<select name="<%= WaybackRequest.REQUEST_DATE %>" size="1">
 													<option value="" selected><%= fmt.format("UIGlobal.selectYearAll") %></option>
 													<option>2010</option>
@@ -91,6 +92,7 @@ String replayPrefix = results.getReplayPrefix();
 													<option>1997</option>
 													<option>1996</option>
 												</select>
+												-->
 												&nbsp;
 												<input type="submit" name="Submit" value="<%= fmt.format("UIGlobal.urlSearchButton") %>" align="absMiddle">
 												&nbsp;
