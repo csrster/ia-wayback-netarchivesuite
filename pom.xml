@@ -4,17 +4,20 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+    from sbforge-nexus repository defined in maven settings
+    -->
     <parent>
         <groupId>org.sbforge</groupId>
         <artifactId>sbforge-parent</artifactId>
         <version>8</version>
     </parent>
 
-    <groupId>org.archive.wayback</groupId>
-    <artifactId>wayback</artifactId>
+    <groupId>dk.netarkivet.wayback</groupId>
+    <artifactId>wayback-netarchivesuite</artifactId>
     <packaging>pom</packaging>
     <version>1.8.0-SNAPSHOT</version>
-    <name>Wayback</name>
+    <name>Wayback-Netarchivesuite</name>
 
     <modules>
         <module>wayback-core</module>
@@ -23,31 +26,44 @@
     </modules>
 
     <properties>
-        <website.url>http://github.com/internetarchive/wayback</website.url>
+        <website.url>https://github.com/csrster/wayback-netarchivesuite</website.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--
+        These properties can be used to build a drop-in warfile using the Spring configuration in
+        src/main/resources/springResources
+        -->
         <replayPort>8091</replayPort>
         <proxyPort>8081</proxyPort>
+        <host>http://kb-prod-way-001.kb.dk</host>
     </properties>
 
     <description>
         The wayback project is an open source implementation of the
-        Internet Archive's Wayback Machine.
+        Internet Archive's Wayback Machine. This fork includes the
+        NetarchiveSuite plugin for Wayback and assorted customisations
+        to Wayback itself.
     </description>
 
-    <url>http://github.com/internetarchive/wayback</url>
+    <url>https://github.com/csrster/wayback-netarchivesuite</url>
     <inceptionYear>2005</inceptionYear>
 
     <licenses>
         <license>
+            <comments>Wayback</comments>
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
+        <license>
+            <comments>Netarchive Suite</comments>
+            <name>GNU Lesser General Public License, version 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+        </license>
     </licenses>
 
     <organization>
-        <name>Internet Archive</name>
-        <url>http://www.archive.org/</url>
+        <name>Netarchive Suite</name>
+        <url>https://sbforge.org/display/NAS/NetarchiveSuite</url>
     </organization>
 
     <issueManagement>
@@ -169,13 +185,14 @@
         </pluginRepository>
     </pluginRepositories>
 
+
     <scm>
         <connection>
-            scm:git:git://github.com/internetarchive/wayback-machine.git
+            scm:git:git://github.com/csrster/wayback-netarchivesuite.git
         </connection>
         <tag>HEAD</tag>
         <url>
-            http://github.com/internetarchive/wayback-machine
+            https://github.com/csrster/wayback-netarchivesuite
         </url>
     </scm>
 
