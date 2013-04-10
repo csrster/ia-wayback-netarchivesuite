@@ -80,6 +80,12 @@
         <dependency>
             <groupId>dk.netarchivesuite</groupId>
             <artifactId>netarchivesuite-wayback</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.archive.wayback</groupId>
+                    <artifactId>wayback-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
