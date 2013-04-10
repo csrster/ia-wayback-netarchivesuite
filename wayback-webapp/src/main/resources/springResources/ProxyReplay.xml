@@ -44,5 +44,8 @@
 
             </list>
         </property>
+        <property name="closestSelector">
+           <bean class="org.archive.wayback.replay.DefaultClosestResultSelector" />
+           </property>
     </bean>
 </beans>

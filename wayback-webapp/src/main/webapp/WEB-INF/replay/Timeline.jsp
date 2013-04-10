@@ -60,6 +60,11 @@ while(it.hasNext()) {
     }
   }
 }
+
+
+CaptureSearchResult res = results.getResult();
+String archiveID = res.getFile() + "/" + res.getOffset();
+
 // string to indicate which select option is currently active
 String yearsOptSelected = "";
 String monthsOptSelected = "";
@@ -307,6 +312,11 @@ function handleDragClick() {
       fmt.format("UIGlobal.helpLink")
       %></a>
 		</td>
+    <tr>
+    <b>
+                                                    <%= archiveID %>
+                                            </b>
+                                    </tr>
 		<td>
 			<img style="display: inline;" wmSpecial="1" alt='' height='1' src='<%= staticPrefix %>/images/1px.gif' width='5'>
 		</td>
