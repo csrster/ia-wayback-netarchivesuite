@@ -70,16 +70,16 @@
             <artifactId>wayback-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>dk.netarchivesuite</groupId>
-            <artifactId>netarchivesuite-common</artifactId>
+            <groupId>org.netarchivesuite</groupId>
+            <artifactId>common-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>dk.netarchivesuite</groupId>
-            <artifactId>netarchivesuite-archive</artifactId>
+            <groupId>org.netarchivesuite</groupId>
+            <artifactId>archive-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>dk.netarchivesuite</groupId>
-            <artifactId>netarchivesuite-wayback</artifactId>
+            <groupId>org.netarchivesuite</groupId>
+            <artifactId>wayback-indexer</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>berkeleydb</groupId>
