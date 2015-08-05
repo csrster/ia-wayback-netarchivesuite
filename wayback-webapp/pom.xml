@@ -74,7 +74,7 @@
 
         <dependency>
             <groupId>org.netarchivesuite</groupId>
-            <artifactId>wayback-indexer</artifactId>
+            <artifactId>wayback-resourcestore</artifactId>
             <exclusions>
                 <exclusion>
                       <groupId>berkeleydb</groupId>
