@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>wayback</artifactId>
-    <groupId>org.archive.wayback</groupId>
-    <version>1.8.1-SNAPSHOT</version>
+      <groupId>dk.netarkivet.wayback</groupId>
+          <artifactId>wayback-netarchivesuite</artifactId>
+      <version>1.8.1-SNAPSHOT</version>
   </parent>
 
     <artifactId>wayback-webapp</artifactId>
@@ -70,6 +70,12 @@
         <dependency>
             <groupId>org.netarchivesuite</groupId>
             <artifactId>common-core</artifactId>
+            <exclusions>
+            <exclusion>
+                <groupId>berkeleydb</groupId>
+                <artifactId>je</artifactId>
+            </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -77,8 +83,8 @@
             <artifactId>wayback-resourcestore</artifactId>
             <exclusions>
                 <exclusion>
-                      <groupId>berkeleydb</groupId>
-                    <artifactId>je</artifactId>
+                    <groupId>org.netpreserve.openwayback</groupId>
+                    <artifactId>openwayback-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -87,8 +93,8 @@
             <artifactId>archive-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.netarchivesuite</groupId>
-            <artifactId>wayback-resourcestore</artifactId>
+            <groupId>dk.netarkivet.wayback</groupId>
+            <artifactId>wayback-core</artifactId>
         </dependency>
     </dependencies>
 

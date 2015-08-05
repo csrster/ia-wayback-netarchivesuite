@@ -16,8 +16,9 @@
 
     <groupId>dk.netarkivet.wayback</groupId>
     <artifactId>wayback-netarchivesuite</artifactId>
-    <packaging>pom</packaging>
     <version>1.8.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
     <name>Wayback</name>
 
     <modules>
@@ -237,20 +238,20 @@
         </pluginManagement>
     </build>
 
+<!--
     <distributionManagement>
         <repository>
             <id>repository</id>
             <name>Repository</name>
-            <!--Pass as command-line system property to maven-->
             <url>${repository.url}</url>
         </repository>
         <site>
             <id>website</id>
             <name>Website</name>
-            <!--Pass as command-line system property to maven-->
             <url>${website.url}/projects/wayback/</url>
         </site>
     </distributionManagement>
+-->
 
     <developers>
         <developer>
@@ -271,7 +272,7 @@
         </developer>
     </developers>
 
-    <reporting>
+    <!--<reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -300,7 +301,7 @@
                 </reportSets>
             </plugin>
         </plugins>
-    </reporting>
+    </reporting> -->
 
     <!--
       Finally, the dependencyManagement - all version coordinates for all
@@ -422,12 +423,12 @@
          <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>common-core</artifactId>
-                <version>5.0-RC2</version>
+                <version>5.1</version>
             </dependency>
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>archive-core</artifactId>
-                <version>5.0-RC2</version>
+                <version>5.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>berkeleydb</groupId>
@@ -438,7 +439,7 @@
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>wayback-resourcestore</artifactId>
-                <version>5.0-RC2</version>
+                <version>5.1</version>
             </dependency>
 
 
