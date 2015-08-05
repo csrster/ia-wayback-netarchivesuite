@@ -426,7 +426,7 @@
             </dependency>
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
-                <artifactId>wayback-indexer</artifactId>
+                <artifactId>wayback-resourcestore</artifactId>
                 <version>5.0-RC2</version>
             </dependency>
 
