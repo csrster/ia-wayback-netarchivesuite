@@ -412,6 +412,24 @@
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>common-core</artifactId>
                 <version>5.0-RC2</version>
+             <exclusions>
+                 <exclusion>
+                     <groupId>org.eclipse.jetty</groupId>
+                     <artifactId>jetty-server</artifactId>
+                 </exclusion>
+                 <exclusion>
+                     <groupId>org.eclipse.jetty</groupId>
+                     <artifactId>jetty-webapp</artifactId>
+                 </exclusion>
+                 <exclusion>
+                     <groupId>org.eclipse.jetty</groupId>
+                     <artifactId>jetty-runner</artifactId>
+                 </exclusion>
+                 <exclusion>
+                     <groupId>berkeleydb</groupId>
+                     <artifactId>je</artifactId>
+                 </exclusion>
+             </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
@@ -428,6 +446,16 @@
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>wayback-resourcestore</artifactId>
                 <version>5.0-RC2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>berkeleydb</groupId>
+                        <artifactId>je</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.archive.wayback</groupId>
+                        <artifactId>wayback-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
 
