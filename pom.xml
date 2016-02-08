@@ -396,6 +396,7 @@
                 <groupId>org.apache.hadoop</groupId>
                 <version>0.20.2-cdh3u4</version>
             </dependency>
+<!--
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>common-core</artifactId>
@@ -417,6 +418,30 @@
                 <artifactId>wayback-resourcestore</artifactId>
                 <version>5.1-SNAPSHOT</version>
             </dependency>
+-->
+         <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>common-core</artifactId>
+                <version>5.0-RC2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>archive-core</artifactId>
+                <version>5.0-RC2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>berkeleydb</groupId>
+                        <artifactId>je</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>wayback-indexer</artifactId>
+                <version>5.0-RC2</version>
+            </dependency>
+
+
 
 
             <dependency>

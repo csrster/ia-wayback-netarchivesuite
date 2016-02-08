@@ -66,13 +66,15 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wayback-core</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.netarchivesuite</groupId>
             <artifactId>common-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.netarchivesuite</groupId>
+            <artifactId>wayback-indexer</artifactId>
             <exclusions>
                 <exclusion>
                       <groupId>berkeleydb</groupId>
