@@ -33,7 +33,7 @@
     <bean name="${replayPort}:wayback" class="org.archive.wayback.webapp.AccessPoint">
         <property name="collection" ref="localcdxcollection" />
         <property name="replay" ref="archivalurlreplay" />
-        <property name="urlRoot" value="http://kb-prod-way-001.kb.dk:${replayPort}/wayback/" />
+        <property name="urlRoot" value="${host}:${replayPort}/wayback/" />
         <property name="query">
             <bean class="org.archive.wayback.query.Renderer">
                 <property name="captureJsp" value="/WEB-INF/query/CalendarResults.jsp" />
@@ -42,7 +42,7 @@
 
         <property name="uriConverter">
             <bean class="org.archive.wayback.archivalurl.ArchivalUrlResultURIConverter">
-                <property name="replayURIPrefix" value="http://kb-prod-way-001.kb.dk:${replayPort}/wayback/"/>
+                <property name="replayURIPrefix" value="${host}:${replayPort}/wayback/"/>
             </bean>
         </property>
 
@@ -57,7 +57,7 @@
 
     <import resource="ProxyReplay.xml"/>
     <bean name="${proxyPort}" parent="${replayPort}:wayback">
-        <property name="urlRoot" value="http://kb-prod-way-001.kb.dk:${proxyPort}/" />
+        <property name="urlRoot" value="${host}:${proxyPort}/" />
         <property name="replay" ref="proxyreplay" />
         <!--<property name="exclusionFactory" ref="static-exclusion"/>-->
         <property name="exclusionFactory">
@@ -68,7 +68,7 @@
         </property>
         <property name="uriConverter">
             <bean class="org.archive.wayback.proxy.RedirectResultURIConverter">
-                <property name="redirectURI" value="http://kb-prod-way-001.kb.dk:${proxyPort}/jsp/QueryUI/Redirect.jsp" />
+                <property name="redirectURI" value="${host}:${proxyPort}/jsp/QueryUI/Redirect.jsp" />
             </bean>
 
         </property>
