@@ -62,7 +62,7 @@ public class RobotExclusionFilter extends ExclusionFilter {
 	private final static Logger LOGGER = 
 		Logger.getLogger(RobotExclusionFilter.class.getName());
 
-	protected final static String HTTP_PREFIX = "http://";
+	//protected final static String HTTP_PREFIX = "http://";
 	protected final static String ROBOT_SUFFIX = "/robots.txt";
 
 	protected static String WWWN_REGEX = "^www[0-9]+\\.";
@@ -105,9 +105,14 @@ public class RobotExclusionFilter extends ExclusionFilter {
 		sb = new StringBuilder(100);
 	}
 
-	protected String hostToRobotUrlString(String host) {
+	protected String hostToRobotUrlString(String host, String scheme) {
 		sb.setLength(0);
-		sb.append(HTTP_PREFIX).append(host).append(ROBOT_SUFFIX);
+		sb.append(scheme);
+		sb.append(host);
+		if (host.endsWith(".")) {
+			sb.deleteCharAt(scheme.length() + host.length() - 1);
+		}
+		sb.append(ROBOT_SUFFIX);
 		String robotUrl = sb.toString();
 		LOGGER.fine("Adding robot URL:" + robotUrl);
 		return robotUrl;
@@ -122,40 +127,65 @@ public class RobotExclusionFilter extends ExclusionFilter {
 	 *     ]
 	 * If HOST starts with "www[0-9]+.DOMAIN":
 	 *     [
-	 *        http://HOST/robots.txt,
 	 *        http://www.DOMAIN/robots.txt,
-	 *        http://DOMAIN/robots.txt
+	 *        http://DOMAIN/robots.txt,
+	 *        http://HOST/robots.txt,        
 	 *     ]
 	 * Otherwise:
 	 *     [
+	 *        http://www.HOST/robots.txt     
 	 *        http://HOST/robots.txt,
-	 *        http://www.HOST/robots.txt
 	 *     ]
 	 */
-	protected List<String> searchResultToRobotUrlStrings(String resultHost) {
+	//TODO: Take a look at this again.. this is the current scheme
+	// (from RedisRobotExclusionFilter)
+	protected List<String> searchResultToRobotUrlStrings(String resultHost, String scheme) {
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(hostToRobotUrlString(resultHost));
 		
-		if(resultHost.startsWith("www")) {
-			if(resultHost.startsWith("www.")) {
-				list.add(hostToRobotUrlString(resultHost.substring(4)));
+		if (resultHost.startsWith("www")) {
+			if (resultHost.startsWith("www.")) {
+				list.add(hostToRobotUrlString(resultHost, scheme));
+				list.add(hostToRobotUrlString(resultHost.substring(4), scheme));
 			} else {
 				Matcher m = WWWN_PATTERN.matcher(resultHost);
 				if(m.find()) {
 					String massagedHost = resultHost.substring(m.end());
-					list.add(hostToRobotUrlString("www." + massagedHost));
-					list.add(hostToRobotUrlString(massagedHost));
+					list.add(hostToRobotUrlString("www." + massagedHost, scheme));
+					list.add(hostToRobotUrlString(massagedHost, scheme));
 				}
+				list.add(hostToRobotUrlString(resultHost, scheme));
 			}
 		} else {
-			list.add(hostToRobotUrlString("www." + resultHost));			
+			list.add(hostToRobotUrlString(resultHost, scheme));			
+			list.add(hostToRobotUrlString("www." + resultHost, scheme));
 		}
+		
 		return list;
 	}
 	
-	private RobotRules getRules(CaptureSearchResult result) {
-		RobotRules rules = null;
-		RobotRules tmpRules = null;
+// Old scheme	
+//	protected List<String> searchResultToRobotUrlStrings(String resultHost, String scheme) {
+//		ArrayList<String> list = new ArrayList<String>();
+//		list.add(hostToRobotUrlString(resultHost, scheme));
+//		
+//		if(resultHost.startsWith("www")) {
+//			if(resultHost.startsWith("www.")) {
+//				list.add(hostToRobotUrlString(resultHost.substring(4), scheme));
+//			} else {
+//				Matcher m = WWWN_PATTERN.matcher(resultHost);
+//				if(m.find()) {
+//					String massagedHost = resultHost.substring(m.end());
+//					list.add(hostToRobotUrlString("www." + massagedHost, scheme));
+//					list.add(hostToRobotUrlString(massagedHost, scheme));
+//				}
+//			}
+//		} else {
+//			list.add(hostToRobotUrlString("www." + resultHost, scheme));			
+//		}
+//		return list;
+//	}
+	
+	protected RobotRules getRules(CaptureSearchResult result) {
 		String host;
 		try {
 			host = result.getOriginalHost();
@@ -163,7 +193,8 @@ public class RobotExclusionFilter extends ExclusionFilter {
 			LOGGER.warning("ROBOT: Failed to get host from("+result.getOriginalUrl()+")");			
 			return null;
 		}
-		List<String> urlStrings = searchResultToRobotUrlStrings(host);
+		String scheme = UrlOperations.urlToScheme(result.getOriginalUrl());
+		List<String> urlStrings = searchResultToRobotUrlStrings(host, scheme);
 		Iterator<String> itr = urlStrings.iterator();
 		String firstUrlString = null;
 
@@ -172,6 +203,7 @@ public class RobotExclusionFilter extends ExclusionFilter {
 		// If we get no responses for any of the robot URLs, use "empty" rules,
 		// and record that in the cache, too.
 		
+		RobotRules rules = null;
 		while(rules == null && itr.hasNext()) {
 			String urlString = (String) itr.next();
 			if(firstUrlString == null) {
@@ -194,7 +226,7 @@ public class RobotExclusionFilter extends ExclusionFilter {
 						LOGGER.fine("ROBOT: NotCached - Downloading("+urlString+")");
 					}
 				
-					tmpRules = new RobotRules();
+					RobotRules tmpRules = new RobotRules();
 					resource = webCache.getCachedResource(new URL(urlString),
 							maxCacheMS,true);
 					//long elapsed = System.currentTimeMillis() - start;
@@ -213,8 +245,22 @@ public class RobotExclusionFilter extends ExclusionFilter {
 					}
 
 				} catch (LiveDocumentNotAvailableException e) {
-					LOGGER.info("ROBOT: LiveDocumentNotAvailableException("+urlString+")");
-
+					// 4xx failures are assumed that no valid robots.txt exists. This includes
+					// 401 "Unauthorized" and 403 "Forbidden" as well as obvious 404. Exit loop
+					// now so that alternative hosts are not checked.
+					// (see https://github.com/internetarchive/wayback/issues/74)
+					int status = e.getOriginalStatuscode();
+					if (status >= 400 && status < 500) {
+						LOGGER.fine("ROBOT: status=" + status + " = no robots.txt: " + urlString);
+						rulesCache.put(firstUrlString, rules = emptyRules);
+					} else if (status > 0) {
+						// other HTTP failures are taken as "full disallow".
+						LOGGER.fine("ROBOT: stauts=" + status + " = full disallow: " + urlString);
+						return null;
+					} else {
+						// non HTTP failures are disregarded.
+						LOGGER.info("ROBOT: LiveDocumentNotAvailableException("+urlString+")");
+					}
 				} catch (MalformedURLException e) {
 //					e.printStackTrace();
 					LOGGER.warning("ROBOT: MalformedURLException("+urlString+")");
@@ -276,7 +322,7 @@ public class RobotExclusionFilter extends ExclusionFilter {
 			String resultURL = r.getOriginalUrl();
 			String path = UrlOperations.getURLPath(resultURL);
 			
-			if(path.equals(ROBOT_SUFFIX)) {
+			if (path.equals(ROBOT_SUFFIX) || r.isRobotIgnore()) {
 				if(!notifiedPassed) {
 					if(filterGroup != null) {
 						filterGroup.setPassedRobots();

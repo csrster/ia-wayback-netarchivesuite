@@ -20,9 +20,13 @@
 package org.archive.wayback.webapp;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,9 +39,13 @@ import org.archive.wayback.core.CaptureSearchResult;
 import org.archive.wayback.core.CaptureSearchResults;
 import org.archive.wayback.core.FastCaptureSearchResult;
 import org.archive.wayback.core.WaybackRequest;
+import org.archive.wayback.exception.AccessControlException;
 import org.archive.wayback.exception.AdministrativeAccessControlException;
 import org.archive.wayback.exception.BadQueryException;
+import org.archive.wayback.exception.ConfigurationException;
 import org.archive.wayback.exception.LiveDocumentNotAvailableException;
+import org.archive.wayback.exception.ResourceIndexNotAvailableException;
+import org.archive.wayback.exception.ResourceNotInArchiveException;
 import org.archive.wayback.exception.RobotAccessControlException;
 import org.archive.wayback.exception.WaybackException;
 import org.archive.wayback.liveweb.LiveWebCache;
@@ -66,12 +74,14 @@ public class LiveWebAccessPoint extends LiveWebRequestHandler {
 	private RobotExclusionFilterFactory robotFactory = null;
 	private StaticMapExclusionFilterFactory adminFactory = null;
 	
-	private String perfStatsHeader = null;
+	private Pattern skipHost = null;
+	private int dnsCheckTimeout = 0;
+	
+	private String requireReferrer = null;
 	
 	public final static String LIVEWEB_RUNTIME_ERROR_HEADER = "X-Archive-Wayback-Runtime-Liveweb-Error";
 	
-	private long maxCacheMS = 86400000;
-	
+	private long maxCacheMS = 86400000;	
 	
 		
 	public boolean handleRequest(HttpServletRequest httpRequest,
@@ -81,20 +91,47 @@ public class LiveWebAccessPoint extends LiveWebRequestHandler {
 		String urlString = translateRequestPathQuery(httpRequest);
 		urlString = UrlOperations.fixupHTTPUrlWithOneSlash(urlString);
 		boolean handled = true;
-		WaybackRequest wbRequest = new WaybackRequest();
-		wbRequest.setAccessPoint(inner);
-
-		wbRequest.setLiveWebRequest(true);
-		wbRequest.setRequestUrl(urlString);
 		
 		ArcResource r = null;
 		
+		WaybackRequest wbRequest = new WaybackRequest();
+		wbRequest.setAccessPoint(inner);
+		wbRequest.setRequestUrl(urlString);
+
 		try {
-			PerfStats.clearAll();
+			String ref = httpRequest.getHeader("Referer");
+			
+			PerfStats.clearAll();			
+			
+			if ((ref == null) || !skipHost.matcher(ref).find()) {
+				wbRequest.setTimestampSearchKey(true);
+				wbRequest.setReplayDate(new Date());
+				wbRequest.setReplayRequest();
+				
+				try {
+					inner.queryIndex(wbRequest);
+					// Succeeded, so send redirect to query
+					httpResponse.sendRedirect(inner.getReplayPrefix() + urlString);
+					return true;
+				} catch (ResourceIndexNotAvailableException e) {
+					throw new LiveDocumentNotAvailableException(e.toString());
+				} catch (ResourceNotInArchiveException e) {
+					//Continue
+				} catch (BadQueryException e) {
+					throw new LiveDocumentNotAvailableException(e.toString());
+				} catch (AccessControlException e) {
+					//Continue
+					//throw new LiveDocumentNotAvailableException(e.toString());
+				} catch (ConfigurationException e) {
+					throw new LiveDocumentNotAvailableException(e.toString());
+				}
+			}
+			
+			wbRequest.setLiveWebRequest(true);
 			
 			if (inner.isEnablePerfStatsHeader()) {
 				PerfStats.timeStart(AccessPoint.PerfStat.Total);
-				httpResponse = new PerfWritingHttpServletResponse(httpResponse, AccessPoint.PerfStat.Total, inner.getPerfStatsHeader());
+				httpResponse = new PerfWritingHttpServletResponse(httpRequest, httpResponse, AccessPoint.PerfStat.Total, inner.getPerfStatsHeader());
 			}
 			
 			Thread.currentThread().setName("Thread " + 
@@ -148,11 +185,19 @@ public class LiveWebAccessPoint extends LiveWebRequestHandler {
 			// Assume http
 			urlString = UrlOperations.HTTP_SCHEME + urlString;
 		}
-		
+				
 		try {
 			url = new URL(urlString);
 		} catch(MalformedURLException e) {
 			throw new BadQueryException("Bad URL(" + urlString + ")");
+		}
+		
+		if ((skipHost != null) && skipHost.matcher(url.getHost()).find()) {
+			return null;
+		}
+		
+		if ((dnsCheckTimeout > 0) && !checkUrlDns(url, dnsCheckTimeout)) {
+			return null;
 		}
 
 		result.setOriginalUrl(urlString);
@@ -210,13 +255,42 @@ public class LiveWebAccessPoint extends LiveWebRequestHandler {
 	}
 	
 	@Override
-	public String getLiveWebRedirect(HttpServletRequest request, WaybackRequest wbRequest)
+	public String getLiveWebRedirect(HttpServletRequest request, WaybackRequest wbRequest, WaybackException we)
 	{
 		if (isLiveWebFound(request, wbRequest)) {
 			return LiveWebRedirector.DEFAULT;
 		}
 		
 		return null;
+	}
+	
+	protected boolean checkUrlDns(URL url, int timeout)
+	{		
+		InetAddress addr = null;
+		
+		try {
+			addr = InetAddress.getByName(url.getHost());
+		} catch (UnknownHostException e) {
+			return false;
+		}
+		
+		if (addr.isAnyLocalAddress() || addr.isLinkLocalAddress() || addr.isLoopbackAddress()) {
+			return false;
+		}
+		
+		if (timeout == 0) {
+			return true;
+		}
+		
+		try {
+			if (addr.isReachable(timeout)) {
+				return true;
+			}
+		} catch (IOException e) {
+
+		}
+		
+		return false;
 	}
 	
 	private boolean isLiveWebFound(HttpServletRequest request, WaybackRequest wbRequest)
@@ -292,11 +366,27 @@ public class LiveWebAccessPoint extends LiveWebRequestHandler {
 		this.adminFactory = adminFactory;
 	}
 
-	public String getPerfStatsHeader() {
-		return perfStatsHeader;
+	public String getSkipHost() {
+		return skipHost.pattern();
 	}
 
-	public void setPerfStatsHeader(String perfStatsHeader) {
-		this.perfStatsHeader = perfStatsHeader;
+	public void setSkipHost(String skipHost) {
+		this.skipHost = Pattern.compile(skipHost);
+	}
+
+	public int getDnsCheckTimeout() {
+		return dnsCheckTimeout;
+	}
+
+	public void setDnsCheckTimeout(int dnsCheckTimeout) {
+		this.dnsCheckTimeout = dnsCheckTimeout;
+	}
+
+	public String getRequireReferrer() {
+		return requireReferrer;
+	}
+
+	public void setRequireReferrer(String requireReferrer) {
+		this.requireReferrer = requireReferrer;
 	}
 }

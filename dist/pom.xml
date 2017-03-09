@@ -5,9 +5,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <artifactId>wayback-netarchivesuite</artifactId>
     <groupId>dk.netarkivet.wayback</groupId>
-    <version>1.8.0-SNAPSHOT</version>
+        <artifactId>wayback-netarchivesuite</artifactId>
+    <version>1.8.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>dist</artifactId>

@@ -53,10 +53,10 @@ public class RemoteLiveWebCache implements LiveWebCache {
 	private static final Logger LOGGER = Logger.getLogger(
 			RemoteLiveWebCache.class.getName());
 
-    private MultiThreadedHttpConnectionManager connectionManager = null;
-    private HostConfiguration hostConfiguration = null;
-    private HttpClient http = null; 
-    private String requestPrefix = null;
+    protected MultiThreadedHttpConnectionManager connectionManager = null;
+    protected HostConfiguration hostConfiguration = null;
+    protected HttpClient http = null; 
+    protected String requestPrefix = null;
 
     /**
      * 
@@ -90,6 +90,7 @@ public class RemoteLiveWebCache implements LiveWebCache {
 			throw new LiveDocumentNotAvailableException("Url:" + urlString +
 					"does not look like an URL?");
 		}
+		boolean success = false;
 	    try {
 	    	int status = http.executeMethod(method);
 	    	if(status == 200) {
@@ -105,6 +106,7 @@ public class RemoteLiveWebCache implements LiveWebCache {
 	    		} else if(ar.getStatusCode() == 504) {
 	    			throw new LiveWebTimeoutException("Timeout:" + urlString);
 	    		}
+	    		success = true;
 	    		return ar;
 	    		
 	    	} else {
@@ -132,6 +134,9 @@ public class RemoteLiveWebCache implements LiveWebCache {
     		throw new LiveWebTimeoutException(e.getLocalizedMessage() 
     				+ " : " + urlString);	    	
 		} finally {
+			if (!success) {
+				method.abort();
+			}
 	    	method.releaseConnection();
 	    }
 	}
@@ -221,5 +226,10 @@ public class RemoteLiveWebCache implements LiveWebCache {
 
 	public void setRequestPrefix(String requestPrefix) {
 		this.requestPrefix = requestPrefix;
+	}
+	
+	public HttpClient getHttpClient()
+	{
+		return http;
 	}
 }

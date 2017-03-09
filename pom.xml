@@ -2,6 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <!--
@@ -15,26 +16,24 @@
 
     <groupId>dk.netarkivet.wayback</groupId>
     <artifactId>wayback-netarchivesuite</artifactId>
+    <version>1.8.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <version>1.8.0-SNAPSHOT</version>
-    <name>Wayback-Netarchivesuite</name>
+
+    <name>Wayback</name>
 
     <modules>
         <module>wayback-core</module>
         <module>wayback-webapp</module>
+        <module>wayback-cdx-server</module>
         <module>dist</module>
     </modules>
 
     <properties>
         <website.url>https://github.com/csrster/wayback-netarchivesuite</website.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--
-        These properties can be used to build a drop-in warfile using the Spring configuration in
-        src/main/resources/springResources
-        -->
-        <replayPort>8091</replayPort>
-        <proxyPort>8081</proxyPort>
-        <host>http://kb-prod-way-001.kb.dk</host>
+        <org.springframework.version>3.0.6.RELEASE</org.springframework.version>
+        <replayPort>8090</replayPort>
+        <proxyPort>8080</proxyPort>
     </properties>
 
     <description>
@@ -143,7 +142,7 @@
             </snapshots>
         </repository>
 
-        <!--<repository>
+        <repository>
             <id>sbforge-nexus</id>
             <name>SBForgeb Nexus Repo manager</name>
             <url>https://sbforge.org/nexus/content/repositories/snapshots</url>
@@ -158,7 +157,7 @@
              <updatePolicy>daily</updatePolicy>
              <checksumPolicy>warn</checksumPolicy>
            </snapshots>
-        </repository>-->
+        </repository>
 
 
 
@@ -239,20 +238,20 @@
         </pluginManagement>
     </build>
 
+<!--
     <distributionManagement>
         <repository>
             <id>repository</id>
             <name>Repository</name>
-            <!--Pass as command-line system property to maven-->
             <url>${repository.url}</url>
         </repository>
         <site>
             <id>website</id>
             <name>Website</name>
-            <!--Pass as command-line system property to maven-->
             <url>${website.url}/projects/wayback/</url>
         </site>
     </distributionManagement>
+-->
 
     <developers>
         <developer>
@@ -273,7 +272,7 @@
         </developer>
     </developers>
 
-    <reporting>
+    <!--<reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -302,7 +301,7 @@
                 </reportSets>
             </plugin>
         </plugins>
-    </reporting>
+    </reporting> -->
 
     <!--
       Finally, the dependencyManagement - all version coordinates for all
@@ -327,7 +326,13 @@
                 <artifactId>wayback-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wayback-cdx-server</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+            <classifier>classes</classifier>
+            </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
@@ -335,11 +340,18 @@
                 <scope>provided</scope>
             </dependency>
 
+
             <dependency>
+              <groupId>org.netpreserve.commons</groupId>
+              <artifactId>webarchive-commons</artifactId>
+              <version>1.1.5-IA</version>
+            </dependency>
+
+            <!--<dependency>
                 <groupId>org.archive.heritrix</groupId>
                 <artifactId>heritrix-commons</artifactId>
                 <version>3.1.2-SNAPSHOT</version>
-            </dependency>
+            </dependency>-->
             <dependency>
                 <groupId>org.archive</groupId>
                 <artifactId>ia-web-commons</artifactId>
@@ -358,12 +370,12 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
-                <version>3.0.6.RELEASE</version>
+                <version>${org.springframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-beans</artifactId>
-                <version>3.0.6.RELEASE</version>
+                <version>${org.springframework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.beanshell</groupId>
@@ -387,54 +399,14 @@
             </dependency>
 <!--
             <dependency>
-                <groupId>dk.netarchivesuite</groupId>
-                <artifactId>netarchivesuite-common</artifactId>
-                <version>4.1-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>dk.netarchivesuite</groupId>
-                <artifactId>netarchivesuite-archive</artifactId>
-                <version>4.1-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>berkeleydb</groupId>
-                        <artifactId>je</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>dk.netarchivesuite</groupId>
-                <artifactId>netarchivesuite-wayback</artifactId>
-                <version>4.1-SNAPSHOT</version>
-            </dependency>
--->
-         <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>common-core</artifactId>
-                <version>5.0-RC2</version>
-             <exclusions>
-                 <exclusion>
-                     <groupId>org.eclipse.jetty</groupId>
-                     <artifactId>jetty-server</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>org.eclipse.jetty</groupId>
-                     <artifactId>jetty-webapp</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>org.eclipse.jetty</groupId>
-                     <artifactId>jetty-runner</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>berkeleydb</groupId>
-                     <artifactId>je</artifactId>
-                 </exclusion>
-             </exclusions>
+                <version>5.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>archive-core</artifactId>
-                <version>5.0-RC2</version>
+                <version>5.1-SNAPSHOT</version>
                 <exclusions>
                     <exclusion>
                         <groupId>berkeleydb</groupId>
@@ -445,17 +417,29 @@
             <dependency>
                 <groupId>org.netarchivesuite</groupId>
                 <artifactId>wayback-resourcestore</artifactId>
-                <version>5.0-RC2</version>
+                <version>5.1-SNAPSHOT</version>
+            </dependency>
+-->
+         <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>common-core</artifactId>
+                <version>5.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>archive-core</artifactId>
+                <version>5.1</version>
                 <exclusions>
                     <exclusion>
                         <groupId>berkeleydb</groupId>
                         <artifactId>je</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.archive.wayback</groupId>
-                        <artifactId>wayback-core</artifactId>
-                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.netarchivesuite</groupId>
+                <artifactId>wayback-resourcestore</artifactId>
+                <version>5.1</version>
             </dependency>
 
 

@@ -13,8 +13,8 @@
 <%@ page import="org.archive.wayback.partition.BubbleCalendarData" %>
 <%@ page import="org.archive.wayback.util.partition.Partition" %>
 <%@ page import="org.archive.wayback.util.StringFormatter" %>
-<jsp:include page="/WEB-INF/template/UI-header.jsp" flush="true" />
 <jsp:include page="/WEB-INF/template/CookieJS.jsp" flush="true" />
+
 <%
 UIResults results = UIResults.extractCaptureQuery(request);
 
@@ -33,10 +33,13 @@ if(graphJspPrefix == null) {
 }
 
 // graph size "constants": These are currently baked-in to the JS logic...
-int imgWidth = 915;
+int imgWidth = 0;
 int imgHeight = 75;
-int yearWidth = 61;
+int yearWidth = 49;
 int monthWidth = 5;
+
+for (int year = 1996; year <= Calendar.getInstance().get(Calendar.YEAR); year++)
+    imgWidth += yearWidth;
 
 BubbleCalendarData data = new BubbleCalendarData(results);
 
@@ -47,6 +50,9 @@ String yearImgUrl = graphJspPrefix + "jsp/graph.jsp?nomonth=1&graphdata=" + year
 Calendar cal = BubbleCalendarData.getUTCCalendar();
 
 %>
+<style type="text/css" src="<%= staticPrefix %>css/styles.css">
+@import url("<%= staticPrefix %>css/styles.css");
+</style>
 <script type="text/javascript" src="<%= staticPrefix %>js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="<%= staticPrefix %>js/excanvas.compiled.js"></script>
 <script type="text/javascript" src="<%= staticPrefix %>js/jquery.bt.min.js" charset="utf-8"></script>
@@ -211,7 +217,7 @@ $().ready(function(){
         
             <form name="form1" method="get" action="<%= queryPrefix %>query">
 			<input type="hidden" name="<%= WaybackRequest.REQUEST_TYPE %>" value="<%= WaybackRequest.REQUEST_CAPTURE_QUERY %>">
-			<input type="text" name="<%= WaybackRequest.REQUEST_URL %>" value="<%= data.searchUrlForHTML %>" size="40">
+                        <input type="text" name="<%= WaybackRequest.REQUEST_URL %>" value="<%= data.searchUrlForHTML %>" size="40" maxlength="256">
             <input type="submit" name="Submit" value="Go Wayback!"/>
             </form>
     
@@ -254,14 +260,14 @@ $().ready(function(){
         </div>
         </a>
         	<%
-        	for(int i = 1996; i < 2011; i++) {
+        	for(int i = 1996; i <= Calendar.getInstance().get(Calendar.YEAR); i++) {
         		String curClass = "inactiveHighlight";
         		if(data.yearNum == i) {
             		curClass = "activeHighlight";
         		}
         	%>
 	            <div class="wbChartThisContainer">
-	                <a style="text-decoration: none;" href="<%= queryPrefix + i + "0101000000*/" + data.searchUrlForJS %>">
+	                <a style="text-decoration: none;" href="<%= queryPrefix + i + "0201000000*/" + data.searchUrlForHTML %>">
 	                
 	                	<div id="highlight-<%= i - 1996 %>"
 						onmouseover="showTrackers('inline'); setActiveYear(<%= i - 1996 %>)" 

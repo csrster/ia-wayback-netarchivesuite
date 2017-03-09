@@ -71,7 +71,7 @@ public class FlexResourceStore implements ResourceStore {
 		this.failOnFirstUnavailable = failOnFirstUnavailable;
 	}
 
-	interface SourceResolver
+	public interface SourceResolver
 	{
 		String[] lookupPath(String filename) throws IOException;
 	}
@@ -149,6 +149,7 @@ public class FlexResourceStore implements ResourceStore {
 	public static class PrefixLookup implements SourceResolver
 	{		
 		String prefix;
+		String skipPrefix = "http://";
 		String includeFilter;
 		
 		public String getPrefix() {
@@ -157,6 +158,14 @@ public class FlexResourceStore implements ResourceStore {
 
 		public void setPrefix(String prefix) {
 			this.prefix = prefix;
+		}
+
+		public String getSkipPrefix() {
+			return skipPrefix;
+		}
+
+		public void setSkipPrefix(String skipPrefix) {
+			this.skipPrefix = skipPrefix;
 		}
 
 		public String getIncludeFilter() {
@@ -175,7 +184,11 @@ public class FlexResourceStore implements ResourceStore {
 				}
 			}
 			
-			return new String[]{prefix + filename};
+			if ((skipPrefix != null) && filename.startsWith(skipPrefix)) {
+				return new String[]{filename};
+			} else {
+				return new String[]{prefix + filename};
+			}
 		}
 	}
 
@@ -254,69 +267,56 @@ public class FlexResourceStore implements ResourceStore {
 		throw rnae;
 	}
 	
-	public Resource getResource(String path, CaptureSearchResult result) throws IOException
+	public Resource getResource(String path, CaptureSearchResult result) throws IOException, ResourceNotAvailableException
 	{		
 		Resource r = null;
 		
 		long offset = result.getOffset();
 		int length = (int)result.getCompressedLength();
 		
-		SeekableLineReader slr = null;
+		if (LOGGER.isLoggable(Level.INFO)) {
+			LOGGER.info("Loading " + path + " - " + offset + ":" + length);
+		}
+		
+		boolean success = false;
+		
+		SeekableLineReader slr = blockLoader.attemptLoadBlock(path, offset, length, false, false);
+		
+		if (slr == null) {
+			return null;
+		}
 		
 		try {
-			slr = blockLoader.createBlockReader(path);
-			
-			slr.seekWithMaxRead(offset, false, length);
-			
 			InputStream is = slr.getInputStream();
 			
-			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.info("Loading " + path + " - " + offset + ":" + length);
-			}
-					
-			ArchiveReader archiveReader = ArchiveReaderFactory.get(path, is, (offset == 0));
-			
-			if (archiveReader instanceof ARCReader) {
-				r = new ArcResource((ARCRecord)archiveReader.get(), archiveReader);
-			} else if (archiveReader instanceof WARCReader) {
-				r = new WarcResource((WARCRecord)archiveReader.get(), archiveReader);	
-			} else {
-				throw new IOException("Unknown ArchiveReader");
-			}
+			r = loadResource(path, is);
 			
 			r.parseHeaders();
 			
-			// Ability to pass on header prefix from data store request
-//			if ((customHeader != null) && (slr instanceof HTTPSeekableLineReader)) {
-//				HTTPSeekableLineReader httpSlr = (HTTPSeekableLineReader)slr;
-//				String value = httpSlr.getHeaderValue(customHeader);
-//				
-//				if (value != null) {				
-//					result.put(CaptureSearchResult.CUSTOM_HEADER_PREFIX + customHeader, value);
-//				}
-//			}
+			success = true;
 			
-		} catch (Exception e) {
-			
-			if (LOGGER.isLoggable(Level.WARNING)) {
-				LOGGER.warning(e.toString());
-			}
-			
-			if (slr != null) {
-				slr.close();
-			}
-			
-			r = null;
-			slr = null;
-			
-			if (e instanceof IOException) {
-				throw (IOException)e;
-			} else {
-				throw new IOException(e);
+		} finally {
+			if (!success) {
+				if (slr != null) {
+					slr.close();
+				}	
 			}
 		}
-				
+
 		return r;
+	}
+	
+	protected Resource loadResource(String path, InputStream is) throws IOException, ResourceNotAvailableException
+	{
+		ArchiveReader archiveReader = ArchiveReaderFactory.get(path, is, false);
+		
+		if (archiveReader instanceof ARCReader) {
+			return new ArcResource((ARCRecord)archiveReader.get(), archiveReader);
+		} else if (archiveReader instanceof WARCReader) {
+			return new WarcResource((WARCRecord)archiveReader.get(), archiveReader);	
+		} else {
+			throw new IOException("Unknown ArchiveReader");
+		}
 	}
 
 	@Override

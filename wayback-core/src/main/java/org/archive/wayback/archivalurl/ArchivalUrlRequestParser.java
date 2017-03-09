@@ -27,6 +27,7 @@ import org.archive.wayback.archivalurl.requestparser.PathDateRangeQueryRequestPa
 import org.archive.wayback.archivalurl.requestparser.PathPrefixDatePrefixQueryRequestParser;
 import org.archive.wayback.archivalurl.requestparser.PathPrefixDateRangeQueryRequestParser;
 import org.archive.wayback.archivalurl.requestparser.ReplayRequestParser;
+import org.archive.wayback.memento.TimeMapRequestParser;
 import org.archive.wayback.requestparser.CompositeRequestParser;
 import org.archive.wayback.requestparser.OpenSearchRequestParser;
 
@@ -34,10 +35,26 @@ import org.archive.wayback.requestparser.OpenSearchRequestParser;
  * CompositeRequestParser that handles Archival Url Replay and Query requests,
  * in addition to "standard" OpenSearch and Form RequestParsers.
  *
+ * <p>Typically, this class is set to AccessPoint to configure ArchivalUrl
+ * access point.</p>
+ *
+ * <h4>Refactoring Note</h4>
+ * <p>It doesn't make much sense to split Archival-Url request parsing
+ * into such fine-grained classes. It just make code less efficient, more difficult to maintain.
+ * It is hard to think of the situation where these sub-parsers are customized separately, and
+ * order is very important.
+ * It also sounds weird to include TimeMapRequestParser in <em>ArchivalUrlRequestParser</em>, even if
+ * TimeMapRequestParser works only in Archival-Url space.
+ * Refactor these classes into one ArchivalUrl replay/query request parser, and rename this class.
+ * Probably this class may be bundled with other ArchivalUrl-related classes for better abstraction.</p>
+ *
+ * @see org.archive.wayback.webapp.AccessPoint#getParser
+ * @see org.archive.wayback.webapp.AccessPoint#handleRequest
  * @author brad
- * @version $Date$, $Revision$
  */
 public class ArchivalUrlRequestParser extends CompositeRequestParser {
+	// TODO: move these constants to where they are actually used.
+	// ArchivalUrl? ReplayRequestParser?
 	/**
 	 * delimiter character for datespec flags
 	 */
@@ -79,6 +96,7 @@ public class ArchivalUrlRequestParser extends CompositeRequestParser {
 	protected RequestParser[] getRequestParsers() {
 		RequestParser[] theParsers = {
 				new ReplayRequestParser(this),
+				new TimeMapRequestParser(this),			
 				new PathDatePrefixQueryRequestParser(this),
 				new PathDateRangeQueryRequestParser(this),
 				new PathPrefixDatePrefixQueryRequestParser(this),
@@ -90,3 +108,4 @@ public class ArchivalUrlRequestParser extends CompositeRequestParser {
 		return theParsers;
 	}
 }
+

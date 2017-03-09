@@ -13,10 +13,9 @@ import org.archive.wayback.exception.LiveDocumentNotAvailableException;
 import org.archive.wayback.exception.LiveWebCacheUnavailableException;
 import org.archive.wayback.exception.LiveWebTimeoutException;
 import org.archive.wayback.liveweb.LiveWebCache;
-import org.archive.wayback.resourcestore.resourcefile.ArcResource;
 import org.archive.wayback.webapp.PerfStats;
 
-import com.google.common.io.LimitInputStream;
+import com.google.common.io.ByteStreams;
 
 public class SimpleRedisRobotsCache implements LiveWebCache {
 	
@@ -39,6 +38,14 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 	
 	final static int STATUS_OK = 200;
 	final static int STATUS_ERROR = 502;
+	/**
+	 * old LiveWebCache did not communicate the specific statuscode
+	 * of live-web fetch. All HTTP failures were marked as 502, and
+	 * interpreted as "all allowed". Now that 5xx are "all disallow",
+	 * this non-standard 4xx status code is used for backward
+	 * compatibility.
+	 */
+	final static int STATUS_OLD_ERROR = 499;
 	
 	final static int MAX_ROBOTS_SIZE = 500000;
 	
@@ -58,7 +65,24 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 	final static String UPDATE_QUEUE_KEY = "robots_update_queue";
 	final static int MAX_UPDATE_QUEUE_SIZE = 50000;
 
+	// migration hack. until refreshTTL is elapsed since startup,
+	// 502 errors in cache are not trusted and refreshed immediately.
+	private final long startupTime;
+	private boolean inMigrationPeriod = false;
+	private static int MIN_UPDATE_INTERVAL = 30 * 60;
+	private final static String ROBOTS_OLD_TOKEN_ERROR = ROBOTS_TOKEN_ERROR + STATUS_ERROR;
+
+	public void setInMigrationPeriod(boolean inMigrationPeriod) {
+		this.inMigrationPeriod = inMigrationPeriod;
+	}
+	public boolean isInMigrationPeriod() {
+		return inMigrationPeriod;
+	}
 	
+	public SimpleRedisRobotsCache() {
+		this.startupTime = System.currentTimeMillis();
+	}
+
 	@Override
 	public Resource getCachedResource(URL urlURL, long maxCacheMS,
 				boolean bUseOlder) throws LiveDocumentNotAvailableException,
@@ -80,7 +104,20 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 		} finally {
 			PerfStats.timeEnd(PerfStat.RobotsRedis);
 		}
-		
+
+		// migration hack - don't trust cached 502 during migration period.
+		// old code records 404 as 502, which results in false blockage with
+		// new code. prevent too frequent updates.
+		if (value != null && inMigrationPeriod) {
+			if (ROBOTS_OLD_TOKEN_ERROR.equals(value.value) &&
+					(notAvailTotalTTL - value.ttl) > MIN_UPDATE_INTERVAL) {
+				long elapsedSec = (System.currentTimeMillis() - startupTime) / 1000;
+				if (elapsedSec < refreshTTL) {
+					value = null;
+				}
+			}
+		}
+
 		// Use the old liveweb cache, if provided
 		if (value == null) {
 			RobotsResult result = loadExternal(urlURL, maxCacheMS, bUseOlder);
@@ -90,7 +127,7 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 			PerfStats.timeEnd(PerfStat.RobotsRedis);
 			
 			if (result == null || result.status != STATUS_OK) {
-				throw new LiveDocumentNotAvailableException("Error Loading Live Robots");	
+				throw new LiveDocumentNotAvailableException(urlURL, result.status);
 			}
 			
 			return new RobotsTxtResource(result.robots);
@@ -106,7 +143,13 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 			String currentRobots = value.value;
 			
 			if (currentRobots.startsWith(ROBOTS_TOKEN_ERROR)) {
-				throw new LiveDocumentNotAvailableException("Robots Error: " + currentRobots);	
+				int status;
+				try {
+					status = Integer.parseInt(currentRobots.substring(ROBOTS_TOKEN_ERROR.length()));
+				} catch (NumberFormatException ex) {
+					status = 0;
+				}
+				throw new LiveDocumentNotAvailableException(urlURL, status);
 			} else if (value.equals(ROBOTS_TOKEN_EMPTY)) {
 				currentRobots = "";
 			}
@@ -195,9 +238,26 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 			this.status = status;
 		}
 		
-		boolean isSameRobots()
-		{
-			return (robots == null) || (oldRobots == null) || robots.equals(oldRobots);			
+		boolean isSameRobots() {
+			// Note: oldRobots is ROBOTS_TOKEN_ERROR + <status> if failure was
+			// cached, whereas robots == null if status != 200.
+			if (robots == null) {
+				// new robots.txt is a failure. compare status.
+				if (oldRobots != null && oldRobots.startsWith(ROBOTS_TOKEN_ERROR)) {
+					int oldStatus;
+					try {
+						oldStatus = Integer.parseInt(oldRobots
+							.substring(ROBOTS_TOKEN_ERROR.length()));
+					} catch (NumberFormatException ex) {
+						oldStatus = 0;
+					}
+					return status == oldStatus;
+				}
+				// no cached robots.txt or 200 -> different.
+				return false;
+			} else {
+				return robots.equals(oldRobots);
+			}
 		}
 	}
 	
@@ -205,29 +265,31 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 	{
 		//RobotsContext context = new RobotsContext(url, current, true, true);
 		
-		ArcResource origResource = null;
+		Resource origResource = null;
 		int status = 0;
 		String contents = null;
 		
 		try {
 			PerfStats.timeStart(PerfStat.RobotsLive);
 			
-			origResource = (ArcResource)liveweb.getCachedResource(urlURL, maxCacheMS, bUseOlder);
+			origResource = liveweb.getCachedResource(urlURL, maxCacheMS, bUseOlder);
+			
 			status = origResource.getStatusCode();
 			
-			if (status == STATUS_OK) {		
-				//String contentType = origResource.getArcRecord().getHeader().getMimetype();
-				
-				int numToRead = (int)origResource.getArcRecord().getHeader().getLength();
-				
-				int maxRead = Math.min(numToRead, MAX_ROBOTS_SIZE);
-				
-				contents = IOUtils.toString(new LimitInputStream(origResource, maxRead), "UTF-8");
-				
-				//context.doRead(numToRead, contentType, origResource, "UTF-8");
+			if (status == STATUS_OK) {	
+				if (origResource instanceof RobotsTxtResource) {
+					contents = ((RobotsTxtResource)origResource).getContents();
+				} else {
+					contents = IOUtils.toString(ByteStreams.limit(origResource, MAX_ROBOTS_SIZE), "UTF-8");
+				}
 			}
-			
+		} catch (LiveDocumentNotAvailableException ex) {
+			status = ex.getOriginalStatuscode();
+			// leave status == 0 as it is - for backward compatibility.
+			if (status == 0)
+				status = STATUS_OLD_ERROR;
 		} catch (Exception e) {
+			LOGGER.log(Level.INFO, "Liveweb fetch failed for " + urlURL, e);
 			status = STATUS_ERROR;
 		} finally {
 			if (origResource != null) {
@@ -333,8 +395,9 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 		} catch (MalformedURLException e) {
 			return new RobotsResult(current);
 		}
-		
-		if ((result.status == STATUS_OK) || cacheFails) {
+		result.oldRobots = current;
+
+		if (result.status == STATUS_OK || !result.isSameRobots() || cacheFails) {
 			this.updateCache(result.robots, url, current, result.status, cacheFails);
 			
 //			if (LOGGER.isLoggable(Level.INFO)) {
@@ -342,7 +405,6 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 //			}
 		}
 		
-		result.oldRobots = current;
 		return result;
 	}
 
@@ -352,6 +414,10 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 
 	public void setRedisConnMan(RedisConnectionManager redisConn) {
 		this.redisCmds = new RedisRobotsLogic(redisConn);
+	}
+
+	public void setRedisCmds(RedisRobotsLogic redisCmds) {
+		this.redisCmds = redisCmds;
 	}
 
 	public LiveWebCache getLiveweb() {
@@ -368,5 +434,22 @@ public class SimpleRedisRobotsCache implements LiveWebCache {
 
 	public void setGzipRobots(boolean gzipRobots) {
 		this.gzipRobots = gzipRobots;
-	}	
+	}
+
+	public int getTotalTTL() {
+		return totalTTL;
+	}
+
+	public void setTotalTTL(int totalTTL) {
+		this.totalTTL = totalTTL;
+	}
+
+	public int getNotAvailTotalTTL() {
+		return notAvailTotalTTL;
+	}
+
+	public void setNotAvailTotalTTL(int notAvailTotalTTL) {
+		this.notAvailTotalTTL = notAvailTotalTTL;
+	}
+
 }

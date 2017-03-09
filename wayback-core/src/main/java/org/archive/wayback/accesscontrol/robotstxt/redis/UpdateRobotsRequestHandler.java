@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.archive.wayback.accesscontrol.ExclusionFilterFactory;
 import org.archive.wayback.accesscontrol.robotstxt.redis.SimpleRedisRobotsCache.RobotsResult;
 import org.archive.wayback.util.webapp.AbstractRequestHandler;
 
@@ -16,8 +17,10 @@ import org.archive.wayback.util.webapp.AbstractRequestHandler;
 public class UpdateRobotsRequestHandler extends AbstractRequestHandler {
 	
 	protected final static String HTTP_PREFIX = "http://";
+	protected final static String HTTPS_PREFIX = "https://";	
 	protected final static String WWW_PREFIX = "www.";
 	protected final static String HTTP_WWW_PREFIX = HTTP_PREFIX + WWW_PREFIX;
+	protected final static String HTTPS_WWW_PREFIX = HTTPS_PREFIX + WWW_PREFIX;	
 	protected final static String ROBOT_SUFFIX = "/robots.txt";
 	
 	private SimpleRedisRobotsCache robotsCache;
@@ -50,23 +53,35 @@ public class UpdateRobotsRequestHandler extends AbstractRequestHandler {
 		String url = this.translateRequestPath(httpRequest);
 		PrintWriter writer = httpResponse.getWriter();
 		
+		if (!url.endsWith(ROBOT_SUFFIX)) {
+			httpResponse.setContentType("text/plain");
+			httpResponse.getWriter().println("The request must end in /robots.txt");
+			return true;
+		}
+		
 		httpResponse.setContentType("text/html");
 		
 		writer.println("<html><body><h2>Wayback Robots Updater</h2>");
 		
-		if (!url.endsWith(ROBOT_SUFFIX)) {
+		if (!url.endsWith(ROBOT_SUFFIX)) {	
 			writer.println("<p>URL to update (<code>" + url + "</code>) must end in /robots.txt</p>");
 		} else if (robotsCache == null) {
 			writer.println("No Robots Cache Set");
 		} else {
-			if (url.startsWith(HTTP_WWW_PREFIX)) {
-				//
-			} else if (url.startsWith(WWW_PREFIX)) {
+//			if (url.startsWith(HTTP_WWW_PREFIX) || url.startsWith(HTTPS_WWW_PREFIX)) {
+//				//
+//			} else if (url.startsWith(WWW_PREFIX)) {
+//				url = HTTP_PREFIX + url;
+//			} else if (url.startsWith(HTTP_PREFIX)) {
+//				url = HTTP_WWW_PREFIX + url.substring(HTTP_PREFIX.length());
+//			} else if (url.startsWith(HTTPS_PREFIX)) {
+//				url = HTTPS_WWW_PREFIX + url.substring(HTTPS_PREFIX.length());				
+//			} else {
+//				url = HTTP_WWW_PREFIX + url;
+//			}
+			
+			if (!url.startsWith(HTTP_PREFIX) && !url.startsWith(HTTPS_PREFIX)) {
 				url = HTTP_PREFIX + url;
-			} else if (url.startsWith(HTTP_PREFIX)) {
-				url = HTTP_WWW_PREFIX + url.substring(7);
-			} else {
-				url = HTTP_WWW_PREFIX + url;
 			}
 			
 			//RobotsContext context = robotsCache.forceUpdate(url, minUpdateTime);
@@ -101,5 +116,4 @@ public class UpdateRobotsRequestHandler extends AbstractRequestHandler {
 		writer.println("<p><i>Current Time: " + new Date().toString() + "</p></body></html>");
 		return true;
 	}
-	
 }

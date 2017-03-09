@@ -2,8 +2,8 @@
  *  This file is part of the Wayback archival access software
  *   (http://archive-access.sourceforge.net/projects/wayback/).
  *
- *  Licensed to the Internet Archive (IA) by one or more individual 
- *  contributors. 
+ *  Licensed to the Internet Archive (IA) by one or more individual
+ *  contributors.
  *
  *  The IA licenses this file to You under the Apache License, Version 2.0
  *  (the "License"); you may not use this file except in compliance with
@@ -25,23 +25,43 @@ import java.util.regex.Pattern;
 import org.archive.wayback.core.CaptureSearchResult;
 import org.archive.wayback.replay.html.ReplayParseContext;
 import org.archive.wayback.replay.html.StringTransformer;
+import org.archive.wayback.replay.html.rewrite.RewriteRule;
+import org.archive.wayback.replay.html.rewrite.RewritingStringTransformer;
 
-public class RegexReplaceStringTransformer implements StringTransformer {
+/**
+ * Replaces all occurrence of regular expression {@code regex} in {@code input}
+ * with {@code replacement}. If the context has {@code disable-rewrite-}
+ * <i>beanName</i> policy, transformation is disabled.
+ *
+ */
+public class RegexReplaceStringTransformer extends RewriteRule implements
+		StringTransformer {
 	private String regex = "";
 	private String replacement = "";
 	private Pattern pattern = null;
-	private String ruleId;
+	// being removed
+	private String urlScope = null;
 
 	public String transform(ReplayParseContext context, String input) {
-		
-		if (ruleId != null) {
-			String policy = context.getData(CaptureSearchResult.CAPTURE_ORACLE_POLICY);
-			
-			if (policy != null && policy.contains("disable-rewrite-" + ruleId)) {
+
+		if (getName() != null) {
+			String policy = context.getOraclePolicy();
+
+			// TODO: move this mechanism to MultiRegexReplaceStringTransformer
+			if (policy != null &&
+					policy.contains("disable-rewrite-" + getName())) {
 				return input;
 			}
 		}
-		
+
+		// being removed
+		if (urlScope != null) {
+			CaptureSearchResult result = context.getCaptureSearchResult();
+			if (result != null && !result.getUrlKey().contains(urlScope)) {
+				return input;
+			}
+		}
+
 		if (pattern == null) {
 			return input;
 		}
@@ -78,11 +98,27 @@ public class RegexReplaceStringTransformer implements StringTransformer {
 		this.replacement = replacement;
 	}
 
-	public String getRuleId() {
-		return ruleId;
+	@Override
+	public String rewrite(ReplayParseContext context, String policy,
+			String input) {
+
+		return transform(context, input);
 	}
 
-	public void setRuleId(String ruleId) {
-		this.ruleId = ruleId;
+	public String getUrlScope() {
+		return urlScope;
+	}
+
+	/**
+	 * {@code urlkey} substring for conditional application of
+	 * this transformation. If specified, transformation is applied
+	 * only when {@code urlkey} contains {@code urlScope}.
+	 * <p>Caveat: this functionality is being removed in favor of
+	 * more flexible and scalable {@link RewritingStringTransformer}
+	 * framework.
+	 * @param urlScope
+	 */
+	public void setUrlScope(String urlScope) {
+		this.urlScope = urlScope;
 	}
 }

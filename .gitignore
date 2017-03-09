@@ -13,6 +13,9 @@ local.properties
 .settings/
 .loadpath
 .idea
+*.iml
+
+.idea/
 
 # Target
 target/

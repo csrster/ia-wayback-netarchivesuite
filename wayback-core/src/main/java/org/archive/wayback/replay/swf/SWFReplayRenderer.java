@@ -33,8 +33,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.httpclient.URIException;
-import org.archive.net.UURI;
-import org.archive.net.UURIFactory;
+import org.archive.url.UsableURI;
+import org.archive.url.UsableURIFactory;
 import org.archive.wayback.ReplayRenderer;
 import org.archive.wayback.ResultURIConverter;
 import org.archive.wayback.core.CaptureSearchResult;
@@ -46,6 +46,7 @@ import org.archive.wayback.exception.BetterRequestException;
 import org.archive.wayback.exception.WaybackException;
 import org.archive.wayback.replay.HttpHeaderOperation;
 import org.archive.wayback.replay.HttpHeaderProcessor;
+import org.archive.wayback.replay.html.ReplayParseContext;
 import org.archive.wayback.util.url.UrlOperations;
 
 import com.flagstone.transform.DoAction;
@@ -99,9 +100,11 @@ public class SWFReplayRenderer implements ReplayRenderer {
 			// copy HTTP response code:
 			HttpHeaderOperation.copyHTTPMessageHeader(httpHeadersResource, httpResponse);
 
+			ReplayParseContext context = ReplayParseContext.create(uriConverter, wbRequest, null, result, false);
+
 			// load and process original headers:
 			Map<String, String> headers = HttpHeaderOperation.processHeaders(
-					httpHeadersResource, result, uriConverter, httpHeaderProcessor);
+					httpHeadersResource, context, httpHeaderProcessor);
 
 			// The URL of the resource, for resolving embedded relative URLs:
 			URL url = null;
@@ -253,7 +256,7 @@ public class SWFReplayRenderer implements ReplayRenderer {
 	}
 
 	private class SWFUrlRewriter {
-		UURI baseUrl = null;
+		UsableURI baseUrl = null;
 		ResultURIConverter converter;
 		String datespec;
 
@@ -262,7 +265,7 @@ public class SWFReplayRenderer implements ReplayRenderer {
 			this.datespec = datespec;
 			this.converter = converter;
 			try {
-				this.baseUrl = UURIFactory
+				this.baseUrl = UsableURIFactory
 						.getInstance(baseUrl.toExternalForm());
 			} catch (URIException e) {
 				e.printStackTrace();
@@ -274,7 +277,7 @@ public class SWFReplayRenderer implements ReplayRenderer {
 			try {
 				String resolved = url;
 				if (baseUrl != null) {
-					resolved = UURIFactory.getInstance(baseUrl, url).toString();
+					resolved = UsableURIFactory.getInstance(baseUrl, url).toString();
 				}
 				return converter.makeReplayURI(datespec, resolved);
 			} catch (URIException e) {

@@ -34,6 +34,7 @@ import org.archive.wayback.core.CaptureSearchResults;
 import org.archive.wayback.core.Resource;
 import org.archive.wayback.core.WaybackRequest;
 import org.archive.wayback.exception.BadContentException;
+import org.archive.wayback.replay.html.ReplayParseContext;
 
 /**
  * ReplayRenderer implementation which returns the archive document as 
@@ -45,6 +46,14 @@ import org.archive.wayback.exception.BadContentException;
  */
 public class TransparentReplayRenderer implements ReplayRenderer {
 	private HttpHeaderProcessor httpHeaderProcessor;
+	
+	// TODO: Figure out best way to generalize this, but probably good default
+	// Add special don't cache header in case of at least 100M
+	private final static long NOCACHE_THRESHOLD = 100000000L;
+
+	private final static String NOCACHE_HEADER_NAME = "X-Accel-Buffering";
+	private final static String NOCACHE_HEADER_VALUE = "no";
+	
 	private final static int BUFFER_SIZE = 4096;
 	public TransparentReplayRenderer(HttpHeaderProcessor httpHeaderProcessor) {
 		this.httpHeaderProcessor = httpHeaderProcessor;
@@ -70,8 +79,10 @@ public class TransparentReplayRenderer implements ReplayRenderer {
 
 		HttpHeaderOperation.copyHTTPMessageHeader(httpHeadersResource, httpResponse);
 
+		ReplayParseContext context = ReplayParseContext.create(uriConverter, wbRequest, null, result, false);
+
 		Map<String,String> headers = HttpHeaderOperation.processHeaders(
-				httpHeadersResource, result, uriConverter, httpHeaderProcessor);
+				httpHeadersResource, context, httpHeaderProcessor);
 
 		// HACKHACK: getContentLength() may not find the original content length
 		// if a HttpHeaderProcessor has mangled it too badly. Should this
@@ -79,6 +90,19 @@ public class TransparentReplayRenderer implements ReplayRenderer {
 		String origLength = HttpHeaderOperation.getContentLength(headers);
 		if(origLength != null) {
 			headers.put(HttpHeaderOperation.HTTP_LENGTH_HEADER, origLength);
+			
+			long contentLength = -1;
+			
+			try {
+			    contentLength = Long.parseLong(origLength);
+			} catch (NumberFormatException n) {
+			    
+			}
+			
+			//TODO: Generalize? Don't buffer NOCACHE_THRESHOLD
+			if ((contentLength >= NOCACHE_THRESHOLD)) {
+			    headers.put(NOCACHE_HEADER_NAME, NOCACHE_HEADER_VALUE);
+			}
 		}
 
 		HttpHeaderOperation.sendHeaders(headers, httpResponse);
